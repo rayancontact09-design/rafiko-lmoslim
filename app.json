@@ -61,7 +61,9 @@
           "icon": "./assets/android-icon-monochrome.png",
           "color": "#0F6B4F"
         }
-      ]
+      ],
+      "expo-audio",
+      "expo-asset"
     ],
     "extra": {
       "router": {}

@@ -1,11 +1,9 @@
-import quranData from "../../../assets/data/quran.json";
 import adkarMatin from "../../../assets/data/adkar-matin.json";
 import adkarSoir from "../../../assets/data/adkar-soir.json";
 import duaas from "../../../assets/data/duaas.json";
-import { Surah } from "../../types/quran";
 import { AdkarItem, DuaaItem } from "../../types/adkar";
+import { findSurahByNumber } from "../quran/useQuranData";
 
-const surahs = quranData as Surah[];
 const allAdkar = [...(adkarMatin as AdkarItem[]), ...(adkarSoir as AdkarItem[])];
 const allDuaas = duaas as DuaaItem[];
 
@@ -22,7 +20,7 @@ export function resolveFavorite(id: string): ResolvedFavorite | null {
 
   if (type === "ayah") {
     const [surahNumber, ayahNumber] = rest.map(Number);
-    const surah = surahs.find((item) => item.number === surahNumber);
+    const surah = findSurahByNumber(surahNumber);
     const ayah = surah?.ayahs.find((item) => item.number === ayahNumber);
     if (!surah || !ayah) return null;
     return {

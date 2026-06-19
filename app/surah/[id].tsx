@@ -59,6 +59,15 @@ export default function SurahScreen() {
         data={surah.ayahs}
         keyExtractor={(item) => String(item.number)}
         contentContainerStyle={{ paddingTop: 16, paddingBottom: 24 }}
+        initialNumToRender={12}
+        maxToRenderPerBatch={12}
+        windowSize={7}
+        removeClippedSubviews
+        ListHeaderComponent={
+          surah.bismillah ? (
+            <Text style={[styles.bismillah, { color: colors.primary }]}>{surah.bismillah}</Text>
+          ) : null
+        }
         renderItem={({ item }) => (
           <AyahCard
             surahNumber={surah.number}
@@ -85,5 +94,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     lineHeight: 26,
+  },
+  bismillah: {
+    fontSize: 24,
+    textAlign: "center",
+    marginBottom: 16,
+    fontWeight: "600",
   },
 });

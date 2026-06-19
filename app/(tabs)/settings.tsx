@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View, Image, StyleSheet } from "react-native";
+import { Text, View, Image, Linking, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
@@ -69,6 +69,17 @@ export default function SettingsScreen() {
           موقعك فقط محلياً على جهازك لحساب مواقيت الصلاة والقبلة، ولا يُخزَّن ولا يُرسل إلى أي خادم.
         </Text>
       </View>
+
+      <AnimatedPressable
+        haptic={false}
+        onPress={() => Linking.openURL("https://tanzil.net")}
+        style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
+      >
+        <Ionicons name="book-outline" size={24} color={colors.primary} />
+        <Text style={[styles.infoText, { color: colors.text }]}>
+          نص القرآن الكريم (الرسم العثماني) مأخوذ من مشروع Tanzil — tanzil.net
+        </Text>
+      </AnimatedPressable>
     </ScreenContainer>
   );
 }

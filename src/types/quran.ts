@@ -5,7 +5,7 @@ export interface Ayah {
   text: string;
 }
 
-export interface Surah {
+export interface SurahMeta {
   number: number;
   name: string;
   englishName: string;
@@ -13,7 +13,11 @@ export interface Surah {
   revelationType: RevelationType;
   ayahCount: number;
   hasFullText: boolean;
+}
+
+export interface Surah extends SurahMeta {
   ayahs: Ayah[];
+  bismillah: string | null;
 }
 
 export interface LastRead {

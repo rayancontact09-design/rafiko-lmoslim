@@ -9,6 +9,8 @@
     "@react-native-community/slider": "5.2.0",
     "adhan": "^4.4.4",
     "expo": "~56.0.12",
+    "expo-asset": "~56.0.17",
+    "expo-audio": "~56.0.12",
     "expo-clipboard": "~56.0.4",
     "expo-constants": "~56.0.18",
     "expo-font": "~56.0.7",

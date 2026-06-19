@@ -8,16 +8,19 @@ import { SurahListItem } from "../../src/components/SurahListItem";
 import { AnimatedPressable } from "../../src/components/AnimatedPressable";
 import { useQuranList, findSurahByNumber } from "../../src/features/quran/useQuranData";
 import { juzStart, hizbStart, TOTAL_JUZ_COUNT, TOTAL_HIZB_COUNT } from "../../src/features/quran/juzHizbBoundaries";
+import { searchAyahText } from "../../src/features/quran/ayahSearch";
+import { useDebouncedValue } from "../../src/utils/useDebouncedValue";
 import { useAppTheme } from "../../src/theme/ThemeProvider";
 import { cardShadow } from "../../src/theme/shadows";
 import { fonts } from "../../src/theme/typography";
 
-type SearchMode = "all" | "juz" | "hizb";
+type SearchMode = "all" | "juz" | "hizb" | "text";
 
 const MODES: { id: SearchMode; label: string }[] = [
   { id: "all", label: "الكل" },
   { id: "juz", label: "بالجزء" },
   { id: "hizb", label: "بالحزب" },
+  { id: "text", label: "بالنص" },
 ];
 
 export default function QuranScreen() {
@@ -26,9 +29,13 @@ export default function QuranScreen() {
   const { colors } = useAppTheme();
   const [mode, setMode] = useState<SearchMode>("all");
   const [numberQuery, setNumberQuery] = useState("");
+  const [textQuery, setTextQuery] = useState("");
+
+  const debouncedTextQuery = useDebouncedValue(textQuery, 250);
+  const textResults = useMemo(() => searchAyahText(debouncedTextQuery), [debouncedTextQuery]);
 
   const numericResult = useMemo(() => {
-    if (mode === "all") return undefined;
+    if (mode !== "juz" && mode !== "hizb") return undefined;
     const n = Number(numberQuery.trim());
     if (!numberQuery.trim() || Number.isNaN(n)) return null;
 
@@ -58,6 +65,7 @@ export default function QuranScreen() {
               onPress={() => {
                 setMode(option.id);
                 setNumberQuery("");
+                setTextQuery("");
               }}
               style={[
                 styles.modeChip,
@@ -86,6 +94,40 @@ export default function QuranScreen() {
             )}
             contentContainerStyle={{ paddingBottom: 24 }}
           />
+        </>
+      ) : mode === "text" ? (
+        <>
+          <SearchBar value={textQuery} onChangeText={setTextQuery} placeholder="ابحث في نص الآيات..." />
+          {textQuery.trim() === "" ? (
+            <Text style={[styles.hint, { color: colors.textMuted }]}>
+              اكتب كلمة أو جزءاً من آية للبحث ضمن النص المتوفر حالياً.
+            </Text>
+          ) : textResults.length === 0 ? (
+            <Text style={[styles.hint, { color: colors.textMuted }]}>
+              لا توجد نتائج ضمن النص المتوفر حالياً من القرآن الكريم.
+            </Text>
+          ) : (
+            <FlatList
+              data={textResults}
+              keyExtractor={(item) => `${item.surahNumber}-${item.ayahNumber}`}
+              contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 8 }}
+              renderItem={({ item }) => (
+                <AnimatedPressable
+                  onPress={() => router.push(`/surah/${item.surahNumber}?ayah=${item.ayahNumber}`)}
+                  style={[styles.resultCard, { backgroundColor: colors.surface, borderColor: colors.border, marginHorizontal: 0 }, cardShadow(colors.shadow) as object]}
+                >
+                  <View style={styles.resultTextWrap}>
+                    <Text style={[styles.resultTitle, { color: colors.primary }]}>
+                      {item.surahName} · آية {item.ayahNumber}
+                    </Text>
+                    <Text style={[styles.resultSubtitle, { color: colors.text }]} numberOfLines={2}>
+                      {item.text}
+                    </Text>
+                  </View>
+                </AnimatedPressable>
+              )}
+            />
+          )}
         </>
       ) : (
         <View>

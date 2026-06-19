@@ -1,11 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, Switch, ScrollView, StyleSheet } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
 import { ScreenContainer } from "../src/components/ScreenContainer";
 import { AnimatedPressable } from "../src/components/AnimatedPressable";
 import { useAdhanSettingsStore, AdhanPrayerKey } from "../src/store/adhanSettingsStore";
+import { useLocationStore } from "../src/store/locationStore";
 import { MUEZZIN_OPTIONS, PRE_ALERT_OPTIONS } from "../src/features/adhan/muezzinOptions";
+import { requestAdhanPermission } from "../src/features/adhan/notificationScheduler";
+import { useAdhanAudioPlayer } from "../src/features/adhan/useAdhanAudioPlayer";
 import { PRAYER_LABELS_AR } from "../src/features/prayerTimes/prayerCalculation";
 import { useAppTheme } from "../src/theme/ThemeProvider";
 import { cardShadow } from "../src/theme/shadows";
@@ -17,6 +20,21 @@ export default function AdhanSettingsScreen() {
   const { colors } = useAppTheme();
   const enabled = useAdhanSettingsStore((state) => state.enabled);
   const setEnabled = useAdhanSettingsStore((state) => state.setEnabled);
+  const location = useLocationStore((state) => state.location);
+  const [permissionDenied, setPermissionDenied] = useState(false);
+
+  const handleToggleEnabled = async (value: boolean) => {
+    if (value) {
+      const status = await requestAdhanPermission();
+      if (status !== "granted") {
+        setPermissionDenied(true);
+        setEnabled(false);
+        return;
+      }
+      setPermissionDenied(false);
+    }
+    setEnabled(value);
+  };
   const perPrayerEnabled = useAdhanSettingsStore((state) => state.perPrayerEnabled);
   const togglePrayer = useAdhanSettingsStore((state) => state.togglePrayer);
   const muezzinId = useAdhanSettingsStore((state) => state.muezzinId);
@@ -25,6 +43,7 @@ export default function AdhanSettingsScreen() {
   const setVolume = useAdhanSettingsStore((state) => state.setVolume);
   const preAlertMinutes = useAdhanSettingsStore((state) => state.preAlertMinutes);
   const togglePreAlert = useAdhanSettingsStore((state) => state.togglePreAlert);
+  const preview = useAdhanAudioPlayer(muezzinId);
 
   return (
     <ScreenContainer>
@@ -35,15 +54,26 @@ export default function AdhanSettingsScreen() {
           <View style={styles.switchRow}>
             <Switch
               value={enabled}
-              onValueChange={setEnabled}
+              onValueChange={handleToggleEnabled}
               trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor={colors.surface}
             />
             <Text style={[styles.switchLabel, { color: colors.text }]}>تفعيل الأذان</Text>
           </View>
           <Text style={[styles.note, { color: colors.textMuted }]}>
-            سيتم تفعيل تشغيل صوت الأذان فعلياً في تحديث قادم. هذه الإعدادات تُحفظ الآن وتُستخدم لاحقاً.
+            سيتم إرسال إشعار محلي عند دخول وقت كل صلاة، بصوت التنبيه الافتراضي للهاتف. صوت الأذان الفعلي
+            سيُفعَّل في تحديث قادم.
           </Text>
+          {permissionDenied && (
+            <Text style={[styles.warning, { color: colors.danger }]}>
+              تم رفض إذن الإشعارات. فعّله من إعدادات الهاتف الخاصة بالتطبيق لتلقي تنبيهات الصلاة.
+            </Text>
+          )}
+          {enabled && !location && (
+            <Text style={[styles.warning, { color: colors.danger }]}>
+              حدد موقعك من صفحة مواقيت الصلاة لتفعيل تنبيهات الأذان بدقة.
+            </Text>
+          )}
         </View>
 
         <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>الصلوات</Text>
@@ -99,6 +129,18 @@ export default function AdhanSettingsScreen() {
             );
           })}
         </View>
+
+        <AnimatedPressable
+          haptic={false}
+          disabled={!preview.isAvailable}
+          onPress={preview.isPlaying ? preview.stop : preview.play}
+          style={[styles.previewButton, { backgroundColor: colors.primarySoft, opacity: preview.isAvailable ? 1 : 0.5 }]}
+        >
+          <Ionicons name={preview.isPlaying ? "stop" : "play"} size={16} color={colors.primary} />
+          <Text style={[styles.previewText, { color: colors.primary }]}>
+            {preview.isAvailable ? "معاينة الصوت" : "لا يوجد ملف صوتي بعد لهذا المؤذن"}
+          </Text>
+        </AnimatedPressable>
 
         <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>مستوى الصوت</Text>
         <View
@@ -177,6 +219,12 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     textAlign: "right",
   },
+  warning: {
+    fontSize: 12,
+    fontFamily: fonts.medium,
+    lineHeight: 20,
+    textAlign: "right",
+  },
   sectionLabel: {
     fontSize: 13,
     fontFamily: fonts.medium,
@@ -202,6 +250,18 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 9,
+  },
+  previewButton: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 14,
+    paddingVertical: 12,
+  },
+  previewText: {
+    fontSize: 13,
+    fontFamily: fonts.medium,
   },
   volumeRow: {
     flexDirection: "row-reverse",

@@ -1,13 +1,13 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Surah } from "../types/quran";
+import { SurahMeta } from "../types/quran";
 import { useAppTheme } from "../theme/ThemeProvider";
 import { cardShadow } from "../theme/shadows";
 import { fonts } from "../theme/typography";
 import { AnimatedPressable } from "./AnimatedPressable";
 
 interface SurahListItemProps {
-  surah: Surah;
+  surah: SurahMeta;
   onPress: () => void;
 }
 

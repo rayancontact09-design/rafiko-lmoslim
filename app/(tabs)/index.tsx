@@ -1,9 +1,13 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { ScrollView, View, Text, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import * as Clipboard from "expo-clipboard";
+import * as Haptics from "expo-haptics";
 import { ScreenContainer } from "../../src/components/ScreenContainer";
 import { HomeCard } from "../../src/components/HomeCard";
+import { ExploreCard } from "../../src/components/ExploreCard";
 import { AnimatedPressable } from "../../src/components/AnimatedPressable";
 import { CircularProgress } from "../../src/components/CircularProgress";
 import { useLastRead } from "../../src/features/quran/useLastRead";
@@ -14,6 +18,7 @@ import { usePrayerSettingsStore } from "../../src/store/prayerSettingsStore";
 import { useKhatmaProgress } from "../../src/features/khatma/useKhatmaProgress";
 import { useDailyPick } from "../../src/features/dailyPick/useDailyPick";
 import { useStatsStore } from "../../src/store/statsStore";
+import { formatHijriDate, formatGregorianDate } from "../../src/utils/hijriDate";
 import { useAppTheme } from "../../src/theme/ThemeProvider";
 import { heroShadow, cardShadow } from "../../src/theme/shadows";
 import { fonts } from "../../src/theme/typography";
@@ -26,9 +31,25 @@ interface MenuItem {
   iconSet: IconSet;
   iconName: keyof typeof Ionicons.glyphMap | keyof typeof MaterialCommunityIcons.glyphMap;
   route: string;
-  badge?: string;
   subtitle?: string;
 }
+
+const MENU_ITEMS: Omit<MenuItem, "subtitle">[] = [
+  { key: "quran", title: "القرآن الكريم", iconSet: "ionicons", iconName: "book", route: "/quran" },
+  { key: "adkar", title: "الأذكار", iconSet: "mci", iconName: "hands-pray", route: "/adkar" },
+  { key: "duaa", title: "الأدعية", iconSet: "mci", iconName: "hand-heart", route: "/duaa" },
+  { key: "prayer-times", title: "مواقيت الصلاة", iconSet: "ionicons", iconName: "time", route: "/prayer-times" },
+  { key: "qibla", title: "القبلة", iconSet: "ionicons", iconName: "compass", route: "/qibla" },
+  { key: "tasbih", title: "السبحة الإلكترونية", iconSet: "mci", iconName: "checkbox-multiple-blank-circle-outline", route: "/tasbih" },
+  { key: "favorites", title: "المفضلة", iconSet: "ionicons", iconName: "star", route: "/favorites" },
+  { key: "stats", title: "إحصائياتي", iconSet: "ionicons", iconName: "stats-chart", route: "/stats" },
+  { key: "settings", title: "الإعدادات", iconSet: "ionicons", iconName: "settings", route: "/settings" },
+];
+
+const EXPLORE_ITEMS: { key: string; title: string; iconSet: IconSet; iconName: keyof typeof Ionicons.glyphMap | keyof typeof MaterialCommunityIcons.glyphMap; route: string; badge: string }[] = [
+  { key: "tafsir", title: "التفسير الميسر", iconSet: "ionicons", iconName: "document-text", route: "/tafsir", badge: "قريباً" },
+  { key: "listen", title: "الاستماع للقرآن", iconSet: "ionicons", iconName: "headset", route: "/listen", badge: "قريباً" },
+];
 
 function formatAppTime(totalSeconds: number): string {
   if (totalSeconds < 60) return "<1 د";
@@ -49,24 +70,31 @@ function formatLastReadDate(timestamp: number): string {
   return `${day} · ${time}`;
 }
 
-function useGreeting() {
-  return useMemo(() => {
-    const hour = new Date().getHours();
-    if (hour >= 4 && hour < 12) {
-      return { text: "صباح الخير", hint: "حان وقت أذكار الصباح" };
-    }
-    if (hour >= 12 && hour < 18) {
-      return { text: "السلام عليكم", hint: "نتمنى لك يوماً مباركاً" };
-    }
-    return { text: "مساء الخير", hint: "حان وقت أذكار المساء" };
-  }, []);
+function CopyButton({ text }: { text: string }) {
+  const { colors } = useAppTheme();
+  const [copied, setCopied] = useState(false);
+
+  return (
+    <AnimatedPressable
+      haptic={false}
+      onPress={async () => {
+        await Clipboard.setStringAsync(text);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+      style={[styles.copyButton, { backgroundColor: colors.primarySoft }]}
+    >
+      <Ionicons name={copied ? "checkmark" : "copy-outline"} size={14} color={colors.primary} />
+      <Text style={[styles.copyButtonText, { color: colors.primary }]}>{copied ? "تم النسخ" : "نسخ"}</Text>
+    </AnimatedPressable>
+  );
 }
 
 export default function HomeScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
   const { lastRead, surah } = useLastRead();
-  const greeting = useGreeting();
   const location = useLocationStore((state) => state.location);
   const timeFormat = usePrayerSettingsStore((state) => state.timeFormat);
   const { hasLocation, todayTimes, nextPrayerKey, nextPrayerLabel, remainingMs } = useNextPrayer();
@@ -76,80 +104,86 @@ export default function HomeScreen() {
   const totalTasbihCount = useStatsStore((state) => state.totalTasbihCount);
   const totalTimeSeconds = useStatsStore((state) => state.totalTimeSeconds);
 
-  const menuItems: MenuItem[] = [
-    { key: "quran", title: "القرآن الكريم", iconSet: "ionicons", iconName: "book", route: "/quran" },
-    { key: "adkar", title: "الأذكار", iconSet: "mci", iconName: "hands-pray", route: "/adkar" },
-    { key: "duaa", title: "الأدعية", iconSet: "mci", iconName: "hand-heart", route: "/duaa" },
-    {
-      key: "khatma",
-      title: "ختمة القرآن",
-      iconSet: "ionicons",
-      iconName: "checkmark-done-circle",
-      route: "/khatma",
-      subtitle: khatma.percent > 0 ? `${khatma.percent}٪` : undefined,
-    },
-    { key: "favorites", title: "المفضلة", iconSet: "ionicons", iconName: "star", route: "/favorites" },
-    { key: "stats", title: "إحصائياتي", iconSet: "ionicons", iconName: "stats-chart", route: "/stats" },
-    { key: "tasbih", title: "السبحة الإلكترونية", iconSet: "mci", iconName: "checkbox-multiple-blank-circle-outline", route: "/tasbih" },
-    { key: "tafsir", title: "التفسير الميسر", iconSet: "ionicons", iconName: "document-text", route: "/tafsir", badge: "قريباً" },
-    { key: "qibla", title: "القبلة", iconSet: "ionicons", iconName: "compass", route: "/qibla" },
-    { key: "prayer-times", title: "مواقيت الصلاة", iconSet: "ionicons", iconName: "time", route: "/prayer-times" },
-    { key: "listen", title: "الاستماع للقرآن", iconSet: "ionicons", iconName: "headset", route: "/listen", badge: "قريباً" },
-    { key: "settings", title: "الإعدادات", iconSet: "ionicons", iconName: "settings", route: "/settings" },
-  ];
+  const now = useMemo(() => new Date(), []);
+  const hijri = useMemo(() => formatHijriDate(now), [now]);
+  const gregorian = useMemo(() => formatGregorianDate(now), [now]);
 
   return (
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={[styles.greeting, { color: colors.text }]}>{greeting.text}</Text>
-          <Text style={[styles.hint, { color: colors.textMuted }]}>{greeting.hint}</Text>
+        <View style={styles.headerRow}>
+          <View style={styles.headerTextBlock}>
+            <View style={styles.titleRow}>
+              <View style={[styles.titleIconWrap, { backgroundColor: colors.primarySoft }]}>
+                <MaterialCommunityIcons name="mosque" size={18} color={colors.primary} />
+              </View>
+              <Text style={[styles.greeting, { color: colors.text }]}>السلام عليكم ورحمة الله</Text>
+            </View>
+            <Text style={[styles.dateText, { color: colors.textMuted }]}>
+              {hijri} · {gregorian}
+            </Text>
+          </View>
+          <AnimatedPressable
+            haptic={false}
+            onPress={() => router.push("/settings")}
+            style={[styles.settingsButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          >
+            <Ionicons name="settings-outline" size={16} color={colors.textMuted} />
+          </AnimatedPressable>
         </View>
 
-        <AnimatedPressable
-          onPress={() => router.push("/prayer-times")}
-          style={[styles.prayerWidget, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
-        >
-          {hasLocation ? (
-            <>
-              <View style={styles.prayerWidgetHeader}>
-                <Text style={[styles.prayerCity, { color: colors.textMuted }]}>{location?.cityNameAr}</Text>
-                <Text style={[styles.prayerNextLabel, { color: colors.primary }]}>الصلاة القادمة: {nextPrayerLabel}</Text>
-              </View>
-              <View style={[styles.countdownPill, { backgroundColor: colors.primarySoft }]}>
-                <Text style={[styles.prayerCountdown, { color: colors.primary }]}>{formatCountdown(remainingMs)}</Text>
-              </View>
-              {todayTimes && (
-                <View style={styles.prayerMiniRow}>
-                  {(Object.keys(PRAYER_LABELS_AR) as Array<keyof typeof PRAYER_LABELS_AR>).map((key) => (
-                    <View key={key} style={styles.prayerMiniItem}>
-                      <Text
-                        style={[
-                          styles.prayerMiniLabel,
-                          { color: key === nextPrayerKey ? colors.primary : colors.textMuted },
-                        ]}
-                      >
-                        {PRAYER_LABELS_AR[key]}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.prayerMiniTime,
-                          { color: key === nextPrayerKey ? colors.primary : colors.text },
-                        ]}
-                      >
-                        {formatPrayerTime(todayTimes[key], location?.timezone ?? null, timeFormat)}
-                      </Text>
-                    </View>
-                  ))}
+        <AnimatedPressable onPress={() => router.push("/prayer-times")} style={styles.prayerWidgetWrap}>
+          <LinearGradient
+            colors={[colors.primaryGradientStart, colors.primaryGradientEnd]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.prayerWidget, heroShadow(colors.shadow) as object]}
+          >
+            {hasLocation ? (
+              <>
+                <View style={styles.prayerWidgetHeader}>
+                  <Text style={[styles.prayerCity, { color: colors.primaryText }]}>{location?.cityNameAr}</Text>
+                  <Text style={[styles.prayerNextLabel, { color: colors.primaryText }]}>
+                    الصلاة القادمة: {nextPrayerLabel}
+                  </Text>
                 </View>
-              )}
-            </>
-          ) : (
-            <View style={styles.prayerWidgetEmpty}>
-              <Ionicons name="time-outline" size={22} color={colors.primary} />
-              <Text style={[styles.prayerEmptyText, { color: colors.text }]}>حدد موقعك لعرض مواقيت الصلاة</Text>
-            </View>
-          )}
+                <View style={[styles.countdownPill, { backgroundColor: "rgba(255,255,255,0.16)" }]}>
+                  <Text style={[styles.prayerCountdown, { color: colors.primaryText }]}>
+                    {formatCountdown(remainingMs)}
+                  </Text>
+                </View>
+                {todayTimes && (
+                  <View style={styles.prayerMiniRow}>
+                    {(Object.keys(PRAYER_LABELS_AR) as Array<keyof typeof PRAYER_LABELS_AR>).map((key) => (
+                      <View key={key} style={styles.prayerMiniItem}>
+                        <Text
+                          style={[
+                            styles.prayerMiniLabel,
+                            { color: colors.primaryText, opacity: key === nextPrayerKey ? 1 : 0.65 },
+                          ]}
+                        >
+                          {PRAYER_LABELS_AR[key]}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.prayerMiniTime,
+                            { color: colors.primaryText, opacity: key === nextPrayerKey ? 1 : 0.85 },
+                          ]}
+                        >
+                          {formatPrayerTime(todayTimes[key], location?.timezone ?? null, timeFormat)}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </>
+            ) : (
+              <View style={styles.prayerWidgetEmpty}>
+                <Ionicons name="time-outline" size={22} color={colors.primaryText} />
+                <Text style={[styles.prayerEmptyText, { color: colors.primaryText }]}>حدد موقعك لعرض مواقيت الصلاة</Text>
+              </View>
+            )}
+          </LinearGradient>
         </AnimatedPressable>
 
         <AnimatedPressable
@@ -168,6 +202,9 @@ export default function HomeScreen() {
                 <Text style={[styles.khatmaStreak, { color: colors.accent }]}>🔥 {khatma.streak} يوم متتالي</Text>
               )}
             </View>
+          </View>
+          <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
+            <View style={[styles.progressFill, { backgroundColor: colors.primary, width: `${khatma.percent}%` }]} />
           </View>
         </AnimatedPressable>
 
@@ -202,55 +239,79 @@ export default function HomeScreen() {
           </View>
         </AnimatedPressable>
 
-        <AnimatedPressable
-          onPress={() => router.push("/stats")}
-          style={[styles.statsWidget, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
-        >
-          <View style={styles.statsItem}>
+        <View style={styles.statsRow}>
+          <AnimatedPressable
+            onPress={() => router.push("/stats")}
+            style={[styles.statsCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
+          >
             <Ionicons name="book-outline" size={18} color={colors.primary} />
             <Text style={[styles.statsValue, { color: colors.text }]}>{openedSurahsCount}</Text>
-            <Text style={[styles.statsLabel, { color: colors.textMuted }]}>سورة</Text>
-          </View>
-          <View style={[styles.statsDivider, { backgroundColor: colors.border }]} />
-          <View style={styles.statsItem}>
+            <Text style={[styles.statsLabel, { color: colors.textMuted }]}>سورة مفتوحة</Text>
+          </AnimatedPressable>
+          <AnimatedPressable
+            onPress={() => router.push("/stats")}
+            style={[styles.statsCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
+          >
             <MaterialCommunityIcons name="checkbox-multiple-blank-circle-outline" size={18} color={colors.primary} />
             <Text style={[styles.statsValue, { color: colors.text }]}>{totalTasbihCount}</Text>
             <Text style={[styles.statsLabel, { color: colors.textMuted }]}>تسبيح</Text>
-          </View>
-          <View style={[styles.statsDivider, { backgroundColor: colors.border }]} />
-          <View style={styles.statsItem}>
+          </AnimatedPressable>
+          <AnimatedPressable
+            onPress={() => router.push("/stats")}
+            style={[styles.statsCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
+          >
             <Ionicons name="time-outline" size={18} color={colors.primary} />
             <Text style={[styles.statsValue, { color: colors.text }]}>{formatAppTime(totalTimeSeconds)}</Text>
             <Text style={[styles.statsLabel, { color: colors.textMuted }]}>في التطبيق</Text>
+          </AnimatedPressable>
+        </View>
+
+        <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>اليوم</Text>
+
+        <View style={[styles.dailyCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}>
+          <View style={styles.dailyHeader}>
+            <CopyButton text={dhikr.text} />
+            <Text style={[styles.dailyTitle, { color: colors.primary }]}>ذكر اليوم</Text>
           </View>
-        </AnimatedPressable>
+          <Text style={[styles.dailyText, { color: colors.text }]}>{dhikr.text}</Text>
+        </View>
+
+        <View style={[styles.dailyCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}>
+          <View style={styles.dailyHeader}>
+            <CopyButton text={duaa.text} />
+            <Text style={[styles.dailyTitle, { color: colors.primary }]}>دعاء اليوم</Text>
+          </View>
+          <Text style={[styles.dailyText, { color: colors.text }]}>{duaa.text}</Text>
+        </View>
+
+        <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>الأقسام</Text>
 
         <View style={styles.grid}>
-          {menuItems.map((item) => (
+          {MENU_ITEMS.map((item) => (
             <View key={item.key} style={styles.gridItem}>
               <HomeCard
                 iconSet={item.iconSet}
                 iconName={item.iconName}
                 title={item.title}
-                badge={item.badge}
-                subtitle={item.subtitle}
                 onPress={() => router.push(item.route as never)}
               />
             </View>
           ))}
         </View>
 
-        <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>اليوم</Text>
-
-        <View style={[styles.dailyCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}>
-          <Text style={[styles.dailyTitle, { color: colors.primary }]}>ذكر اليوم</Text>
-          <Text style={[styles.dailyText, { color: colors.text }]}>{dhikr.text}</Text>
-        </View>
-
-        <View style={[styles.dailyCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}>
-          <Text style={[styles.dailyTitle, { color: colors.primary }]}>دعاء اليوم</Text>
-          <Text style={[styles.dailyText, { color: colors.text }]}>{duaa.text}</Text>
-        </View>
+        <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>اكتشف المزيد</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.exploreRow}>
+          {EXPLORE_ITEMS.map((item) => (
+            <ExploreCard
+              key={item.key}
+              iconSet={item.iconSet}
+              iconName={item.iconName}
+              title={item.title}
+              badge={item.badge}
+              onPress={() => router.push(item.route as never)}
+            />
+          ))}
+        </ScrollView>
       </ScrollView>
     </ScreenContainer>
   );
@@ -261,25 +322,55 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 32,
-    gap: 16,
+    gap: 22,
   },
-  header: {
+  headerRow: {
+    flexDirection: "row-reverse",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  headerTextBlock: {
+    flex: 1,
     alignItems: "flex-end",
+    gap: 4,
+  },
+  titleRow: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    gap: 8,
+  },
+  titleIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
   },
   greeting: {
-    fontSize: 26,
+    fontSize: 19,
     fontFamily: fonts.bold,
+    textAlign: "right",
   },
-  hint: {
-    fontSize: 14,
+  dateText: {
+    fontSize: 12,
     fontFamily: fonts.regular,
-    marginTop: 2,
+    textAlign: "right",
+  },
+  settingsButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  prayerWidgetWrap: {
+    borderRadius: 24,
   },
   prayerWidget: {
-    borderWidth: 1,
-    borderRadius: 18,
-    padding: 16,
-    gap: 6,
+    borderRadius: 24,
+    padding: 20,
+    gap: 10,
   },
   prayerWidgetHeader: {
     flexDirection: "row-reverse",
@@ -289,18 +380,19 @@ const styles = StyleSheet.create({
   prayerCity: {
     fontSize: 12,
     fontFamily: fonts.regular,
+    opacity: 0.85,
   },
   prayerNextLabel: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fonts.semiBold,
   },
   countdownPill: {
-    borderRadius: 14,
-    paddingVertical: 8,
+    borderRadius: 16,
+    paddingVertical: 12,
     alignItems: "center",
   },
   prayerCountdown: {
-    fontSize: 32,
+    fontSize: 36,
     fontFamily: fonts.bold,
     textAlign: "center",
     letterSpacing: 1,
@@ -308,7 +400,7 @@ const styles = StyleSheet.create({
   prayerMiniRow: {
     flexDirection: "row-reverse",
     justifyContent: "space-between",
-    marginTop: 6,
+    marginTop: 4,
   },
   prayerMiniItem: {
     alignItems: "center",
@@ -327,7 +419,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    paddingVertical: 4,
+    paddingVertical: 8,
   },
   prayerEmptyText: {
     fontSize: 14,
@@ -335,9 +427,9 @@ const styles = StyleSheet.create({
   },
   khatmaWidget: {
     borderWidth: 1,
-    borderRadius: 18,
-    padding: 16,
-    gap: 10,
+    borderRadius: 22,
+    padding: 18,
+    gap: 14,
   },
   khatmaRow: {
     flexDirection: "row-reverse",
@@ -361,9 +453,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: fonts.medium,
   },
+  progressTrack: {
+    height: 8,
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    borderRadius: 4,
+  },
   hero: {
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: 22,
+    padding: 18,
     gap: 14,
   },
   heroTopRow: {
@@ -404,35 +505,71 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    borderRadius: 12,
-    paddingVertical: 10,
+    borderRadius: 14,
+    paddingVertical: 12,
   },
   heroButtonText: {
     fontFamily: fonts.semiBold,
     fontSize: 14,
   },
-  statsWidget: {
+  statsRow: {
     flexDirection: "row-reverse",
+    gap: 12,
+  },
+  statsCard: {
+    flex: 1,
     borderWidth: 1,
     borderRadius: 18,
-    padding: 14,
+    paddingVertical: 16,
     alignItems: "center",
-  },
-  statsItem: {
-    flex: 1,
-    alignItems: "center",
-    gap: 2,
-  },
-  statsDivider: {
-    width: 1,
-    height: 32,
+    gap: 4,
   },
   statsValue: {
-    fontSize: 16,
+    fontSize: 20,
     fontFamily: fonts.bold,
   },
   statsLabel: {
     fontSize: 11,
+    fontFamily: fonts.regular,
+    textAlign: "center",
+  },
+  sectionLabel: {
+    fontSize: 15,
+    fontFamily: fonts.bold,
+    textAlign: "right",
+  },
+  dailyCard: {
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 18,
+    gap: 10,
+  },
+  dailyHeader: {
+    flexDirection: "row-reverse",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  dailyTitle: {
+    fontSize: 13,
+    fontFamily: fonts.semiBold,
+    textAlign: "right",
+  },
+  copyButton: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    gap: 4,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  copyButtonText: {
+    fontSize: 11,
+    fontFamily: fonts.medium,
+  },
+  dailyText: {
+    fontSize: 17,
+    lineHeight: 28,
+    textAlign: "right",
     fontFamily: fonts.regular,
   },
   grid: {
@@ -441,29 +578,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   gridItem: {
-    width: "47%",
+    width: "30.6%",
   },
-  sectionLabel: {
-    fontSize: 15,
-    fontFamily: fonts.bold,
-    textAlign: "right",
-    marginTop: 4,
-  },
-  dailyCard: {
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 16,
-    gap: 8,
-  },
-  dailyTitle: {
-    fontSize: 13,
-    fontFamily: fonts.semiBold,
-    textAlign: "right",
-  },
-  dailyText: {
-    fontSize: 17,
-    lineHeight: 28,
-    textAlign: "right",
-    fontFamily: fonts.regular,
+  exploreRow: {
+    flexDirection: "row",
+    gap: 12,
+    paddingBottom: 4,
   },
 });

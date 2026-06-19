@@ -8,16 +8,15 @@ import { fonts } from "../theme/typography";
 
 type IconSet = "ionicons" | "mci";
 
-interface HomeCardProps {
+interface ExploreCardProps {
   iconSet: IconSet;
   iconName: keyof typeof Ionicons.glyphMap | keyof typeof MaterialCommunityIcons.glyphMap;
   title: string;
   badge?: string;
-  subtitle?: string;
   onPress: () => void;
 }
 
-export function HomeCard({ iconSet, iconName, title, badge, subtitle, onPress }: HomeCardProps) {
+export function ExploreCard({ iconSet, iconName, title, badge, onPress }: ExploreCardProps) {
   const { colors } = useAppTheme();
   const IconComponent = iconSet === "ionicons" ? Ionicons : MaterialCommunityIcons;
 
@@ -41,22 +40,17 @@ export function HomeCard({ iconSet, iconName, title, badge, subtitle, onPress }:
       <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>
         {title}
       </Text>
-      {subtitle && (
-        <Text style={[styles.subtitle, { color: colors.primary }]} numberOfLines={1}>
-          {subtitle}
-        </Text>
-      )}
     </AnimatedPressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    flex: 1,
+    width: 132,
     borderWidth: 1,
     borderRadius: 18,
     paddingVertical: 16,
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     alignItems: "center",
     gap: 8,
   },
@@ -72,11 +66,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     textAlign: "center",
     lineHeight: 16,
-  },
-  subtitle: {
-    fontSize: 11,
-    fontFamily: fonts.semiBold,
-    marginTop: -6,
   },
   badge: {
     position: "absolute",

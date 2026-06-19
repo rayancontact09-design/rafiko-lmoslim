@@ -12,6 +12,8 @@ export const lightColors = {
   accentSoft: "#F3E9D1",
   shadow: "#0B2A20",
   danger: "#B3473A",
+  primaryGradientStart: "#16805F",
+  primaryGradientEnd: "#0A4A38",
 };
 
 export const darkColors = {
@@ -28,6 +30,8 @@ export const darkColors = {
   accentSoft: "#2B2414",
   shadow: "#000000",
   danger: "#E0786A",
+  primaryGradientStart: "#3FD4A4",
+  primaryGradientEnd: "#1B6B52",
 };
 
 export type AppColors = typeof lightColors;

@@ -3,6 +3,7 @@ import { useAdhanSettingsStore } from "../../store/adhanSettingsStore";
 import { useLocationStore } from "../../store/locationStore";
 import { usePrayerSettingsStore } from "../../store/prayerSettingsStore";
 import { rescheduleAdhanNotifications, cancelAllAdhanNotifications } from "./notificationScheduler";
+import { isExpoGo } from "../../utils/isExpoGo";
 
 export function useAdhanScheduler() {
   const enabled = useAdhanSettingsStore((state) => state.enabled);
@@ -13,6 +14,8 @@ export function useAdhanScheduler() {
   const madhab = usePrayerSettingsStore((state) => state.madhab);
 
   useEffect(() => {
+    if (isExpoGo) return;
+
     if (!enabled || !location) {
       cancelAllAdhanNotifications().catch(() => {});
       return;

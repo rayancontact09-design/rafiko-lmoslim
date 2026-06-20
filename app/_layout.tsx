@@ -5,7 +5,6 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as SplashScreen from "expo-splash-screen";
-import * as Notifications from "expo-notifications";
 import {
   useFonts,
   Cairo_400Regular,
@@ -17,6 +16,7 @@ import { ThemeProvider, useAppTheme } from "../src/theme/ThemeProvider";
 import { useAppUsageTracking } from "../src/features/stats/useAppUsageTracking";
 import { useAdhanScheduler } from "../src/features/adhan/useAdhanScheduler";
 import { useWidgetSnapshotSync } from "../src/features/widgets/useWidgetSnapshotSync";
+import { initNotificationHandler } from "../src/features/adhan/notificationScheduler";
 
 if (!I18nManager.isRTL) {
   I18nManager.allowRTL(true);
@@ -25,15 +25,8 @@ if (!I18nManager.isRTL) {
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// No-ops automatically in Expo Go (see isExpoGo.ts) — safe to call unconditionally.
+initNotificationHandler();
 
 function RootStack() {
   const { colors, isDark } = useAppTheme();

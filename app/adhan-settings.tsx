@@ -13,6 +13,7 @@ import { PRAYER_LABELS_AR } from "../src/features/prayerTimes/prayerCalculation"
 import { useAppTheme } from "../src/theme/ThemeProvider";
 import { cardShadow } from "../src/theme/shadows";
 import { fonts } from "../src/theme/typography";
+import { isExpoGo } from "../src/utils/isExpoGo";
 
 const PRAYER_KEYS: AdhanPrayerKey[] = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
 
@@ -55,6 +56,7 @@ export default function AdhanSettingsScreen() {
             <Switch
               value={enabled}
               onValueChange={handleToggleEnabled}
+              disabled={isExpoGo}
               trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor={colors.surface}
             />
@@ -64,6 +66,12 @@ export default function AdhanSettingsScreen() {
             سيتم إرسال إشعار محلي عند دخول وقت كل صلاة، بصوت التنبيه الافتراضي للهاتف. صوت الأذان الفعلي
             سيُفعَّل في تحديث قادم.
           </Text>
+          {isExpoGo && (
+            <Text style={[styles.warning, { color: colors.danger }]}>
+              الإشعارات غير متوفرة في تطبيق Expo Go. جرّب هذه الميزة عبر بناء تطوير (development build) أو
+              نسخة الإصدار النهائي للتطبيق.
+            </Text>
+          )}
           {permissionDenied && (
             <Text style={[styles.warning, { color: colors.danger }]}>
               تم رفض إذن الإشعارات. فعّله من إعدادات الهاتف الخاصة بالتطبيق لتلقي تنبيهات الصلاة.

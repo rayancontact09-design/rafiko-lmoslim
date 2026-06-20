@@ -32,11 +32,17 @@ export default function KhatmaScreen() {
   return (
     <ScreenContainer>
       <View style={styles.headerRow}>
-        <AnimatedPressable haptic={false} onPress={() => router.push("/khatma-settings")} style={styles.settingsButton}>
+        <AnimatedPressable
+          haptic={false}
+          onPress={() => router.push("/khatma-settings")}
+          accessibilityRole="button"
+          accessibilityLabel="إعدادات الختمة"
+          style={styles.settingsButton}
+        >
           <Ionicons name="options-outline" size={20} color={colors.textMuted} />
         </AnimatedPressable>
         <Text style={[styles.summaryTitle, { color: colors.text }]}>تقدّم الختمة</Text>
-        <View style={{ width: 28 }} />
+        <View style={{ width: 44 }} />
       </View>
 
       <View style={styles.ringRow}>
@@ -60,7 +66,13 @@ export default function KhatmaScreen() {
           <Text style={[styles.goalTitle, { color: colors.text }]}>الهدف اليومي</Text>
         </View>
         <View style={styles.goalRow}>
-          <AnimatedPressable haptic={false} onPress={() => setDailyGoal(dailyGoal + 1)} style={[styles.stepperButton, { borderColor: colors.border }]}>
+          <AnimatedPressable
+            haptic={false}
+            onPress={() => setDailyGoal(dailyGoal + 1)}
+            accessibilityRole="button"
+            accessibilityLabel="زيادة الهدف اليومي"
+            style={[styles.stepperButton, { borderColor: colors.border }]}
+          >
             <Ionicons name="add" size={16} color={colors.text} />
           </AnimatedPressable>
           <Text style={[styles.goalValue, { color: goalReachedToday ? colors.primary : colors.text }]}>
@@ -69,6 +81,8 @@ export default function KhatmaScreen() {
           <AnimatedPressable
             haptic={false}
             onPress={() => setDailyGoal(Math.max(1, dailyGoal - 1))}
+            accessibilityRole="button"
+            accessibilityLabel="تقليل الهدف اليومي"
             style={[styles.stepperButton, { borderColor: colors.border }]}
           >
             <Ionicons name="remove" size={16} color={colors.text} />
@@ -91,6 +105,9 @@ export default function KhatmaScreen() {
           return (
             <AnimatedPressable
               onPress={() => toggle(item)}
+              accessibilityRole="checkbox"
+              accessibilityLabel={`${unitLabel} ${item}`}
+              accessibilityState={{ checked: isCompleted }}
               style={[
                 styles.cell,
                 {
@@ -108,7 +125,12 @@ export default function KhatmaScreen() {
           );
         }}
         ListFooterComponent={
-          <AnimatedPressable onPress={reset} style={styles.resetLink}>
+          <AnimatedPressable
+            onPress={reset}
+            accessibilityRole="button"
+            accessibilityLabel="إعادة تصفير الختمة"
+            style={styles.resetLink}
+          >
             <Text style={[styles.resetText, { color: colors.danger }]}>إعادة تصفير الختمة</Text>
           </AnimatedPressable>
         }
@@ -127,8 +149,10 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   settingsButton: {
-    padding: 4,
-    width: 28,
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
   summaryTitle: {
     fontSize: 18,
@@ -180,9 +204,9 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   stepperButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",

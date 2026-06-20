@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { I18nManager } from "react-native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -17,6 +17,7 @@ import { useAppUsageTracking } from "../src/features/stats/useAppUsageTracking";
 import { useAdhanScheduler } from "../src/features/adhan/useAdhanScheduler";
 import { useWidgetSnapshotSync } from "../src/features/widgets/useWidgetSnapshotSync";
 import { initNotificationHandler } from "../src/features/adhan/notificationScheduler";
+import { ErrorBoundary } from "../src/components/ErrorBoundary";
 
 if (!I18nManager.isRTL) {
   I18nManager.allowRTL(true);
@@ -27,6 +28,21 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // No-ops automatically in Expo Go (see isExpoGo.ts) — safe to call unconditionally.
 initNotificationHandler();
+
+function AppErrorBoundary({ children }: { children: React.ReactNode }) {
+  const { colors } = useAppTheme();
+  const [resetKey, setResetKey] = useState(0);
+
+  return (
+    <ErrorBoundary
+      key={resetKey}
+      colors={colors}
+      onRetry={() => setResetKey((key) => key + 1)}
+    >
+      {children}
+    </ErrorBoundary>
+  );
+}
 
 function RootStack() {
   const { colors, isDark } = useAppTheme();
@@ -67,7 +83,7 @@ function RootStack() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Cairo_400Regular,
     Cairo_500Medium,
     Cairo_600SemiBold,
@@ -75,12 +91,21 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontsLoaded) {
+    if (fontError && __DEV__) {
+      // eslint-disable-next-line no-console
+      console.error("Cairo font failed to load, falling back to system font:", fontError);
+    }
+  }, [fontError]);
+
+  useEffect(() => {
+    // Proceed even on font failure — better a system-font UI than a blank
+    // screen stuck forever waiting for fonts that will never load.
+    if (fontsLoaded || fontError) {
       SplashScreen.hideAsync().catch(() => {});
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded && !fontError) {
     return null;
   }
 
@@ -88,7 +113,9 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider>
-          <RootStack />
+          <AppErrorBoundary>
+            <RootStack />
+          </AppErrorBoundary>
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

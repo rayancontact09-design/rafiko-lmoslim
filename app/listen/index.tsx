@@ -31,6 +31,9 @@ export default function ListenIndexScreen() {
               key={option.id}
               haptic={false}
               onPress={() => setSelectedQariId(option.id)}
+              accessibilityRole="radio"
+              accessibilityLabel={option.nameAr}
+              accessibilityState={{ selected }}
               style={[
                 styles.chip,
                 {
@@ -87,6 +90,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical: 9,
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

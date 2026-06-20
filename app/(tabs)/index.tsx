@@ -83,6 +83,8 @@ function CopyButton({ text }: { text: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       }}
+      accessibilityRole="button"
+      accessibilityLabel={copied ? "تم نسخ النص" : "نسخ النص"}
       style={[styles.copyButton, { backgroundColor: colors.primarySoft }]}
     >
       <Ionicons name={copied ? "checkmark" : "copy-outline"} size={14} color={colors.primary} />
@@ -126,13 +128,24 @@ export default function HomeScreen() {
           <AnimatedPressable
             haptic={false}
             onPress={() => router.push("/settings")}
+            accessibilityRole="button"
+            accessibilityLabel="الإعدادات"
             style={[styles.settingsButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
           >
-            <Ionicons name="settings-outline" size={16} color={colors.textMuted} />
+            <Ionicons name="settings-outline" size={18} color={colors.textMuted} />
           </AnimatedPressable>
         </View>
 
-        <AnimatedPressable onPress={() => router.push("/prayer-times")} style={styles.prayerWidgetWrap}>
+        <AnimatedPressable
+          onPress={() => router.push("/prayer-times")}
+          accessibilityRole="button"
+          accessibilityLabel={
+            hasLocation
+              ? `مواقيت الصلاة، الصلاة القادمة ${nextPrayerLabel} بعد ${formatCountdown(remainingMs)}`
+              : "مواقيت الصلاة، حدد موقعك لعرضها"
+          }
+          style={styles.prayerWidgetWrap}
+        >
           <LinearGradient
             colors={[colors.primaryGradientStart, colors.primaryGradientEnd]}
             start={{ x: 0, y: 0 }}
@@ -188,6 +201,10 @@ export default function HomeScreen() {
 
         <AnimatedPressable
           onPress={() => router.push("/khatma")}
+          accessibilityRole="button"
+          accessibilityLabel={`ختمة القرآن، ${khatma.percent} بالمئة، ${
+            khatma.currentUnit !== null ? `${khatma.unitLabel} الحالي ${khatma.currentUnit}` : "اكتملت الختمة"
+          }`}
           style={[styles.khatmaWidget, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
         >
           <View style={styles.khatmaRow}>
@@ -213,6 +230,12 @@ export default function HomeScreen() {
             lastRead && surah
               ? router.push(`/surah/${surah.number}?ayah=${lastRead.ayahNumber}`)
               : router.push("/quran")
+          }
+          accessibilityRole="button"
+          accessibilityLabel={
+            lastRead && surah
+              ? `متابعة القراءة، ${surah.name}، آية ${lastRead.ayahNumber}`
+              : "ابدأ القراءة من سورة الفاتحة"
           }
           style={[styles.hero, { backgroundColor: colors.primary }, heroShadow(colors.shadow) as object]}
         >
@@ -242,6 +265,8 @@ export default function HomeScreen() {
         <View style={styles.statsRow}>
           <AnimatedPressable
             onPress={() => router.push("/stats")}
+            accessibilityRole="button"
+            accessibilityLabel={`${openedSurahsCount} سورة مفتوحة، عرض الإحصائيات`}
             style={[styles.statsCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
           >
             <Ionicons name="book-outline" size={18} color={colors.primary} />
@@ -250,6 +275,8 @@ export default function HomeScreen() {
           </AnimatedPressable>
           <AnimatedPressable
             onPress={() => router.push("/stats")}
+            accessibilityRole="button"
+            accessibilityLabel={`${totalTasbihCount} تسبيح، عرض الإحصائيات`}
             style={[styles.statsCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
           >
             <MaterialCommunityIcons name="checkbox-multiple-blank-circle-outline" size={18} color={colors.primary} />
@@ -258,6 +285,8 @@ export default function HomeScreen() {
           </AnimatedPressable>
           <AnimatedPressable
             onPress={() => router.push("/stats")}
+            accessibilityRole="button"
+            accessibilityLabel={`${formatAppTime(totalTimeSeconds)} في التطبيق، عرض الإحصائيات`}
             style={[styles.statsCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
           >
             <Ionicons name="time-outline" size={18} color={colors.primary} />
@@ -357,9 +386,9 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   settingsButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",

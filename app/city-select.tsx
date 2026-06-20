@@ -32,6 +32,8 @@ export default function CitySelectScreen() {
               setManualCity(item.id);
               router.back();
             }}
+            accessibilityRole="button"
+            accessibilityLabel={`${item.nameAr}، ${item.countryAr}`}
             style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
           >
             <Text style={[styles.country, { color: colors.textMuted }]}>{item.countryAr}</Text>

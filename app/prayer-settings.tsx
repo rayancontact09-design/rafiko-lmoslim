@@ -38,6 +38,9 @@ export default function PrayerSettingsScreen() {
                 key={option.id}
                 haptic={false}
                 onPress={() => setMethod(option.id)}
+                accessibilityRole="radio"
+                accessibilityLabel={option.labelAr}
+                accessibilityState={{ selected }}
                 style={[
                   styles.chip,
                   { backgroundColor: selected ? colors.primary : colors.surface, borderColor: selected ? colors.primary : colors.border },
@@ -60,6 +63,9 @@ export default function PrayerSettingsScreen() {
                 key={option.id}
                 haptic={false}
                 onPress={() => setMadhab(option.id)}
+                accessibilityRole="radio"
+                accessibilityLabel={option.labelAr}
+                accessibilityState={{ selected }}
                 style={[
                   styles.chip,
                   { backgroundColor: selected ? colors.primary : colors.surface, borderColor: selected ? colors.primary : colors.border },
@@ -82,6 +88,9 @@ export default function PrayerSettingsScreen() {
                 key={option.id}
                 haptic={false}
                 onPress={() => setTimeFormat(option.id)}
+                accessibilityRole="radio"
+                accessibilityLabel={option.labelAr}
+                accessibilityState={{ selected }}
                 style={[
                   styles.chip,
                   { backgroundColor: selected ? colors.primary : colors.surface, borderColor: selected ? colors.primary : colors.border },
@@ -125,7 +134,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical: 9,
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
   note: {
     fontSize: 12,

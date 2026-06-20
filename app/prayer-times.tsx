@@ -37,11 +37,19 @@ export default function PrayerTimesScreen() {
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.topRow}>
-          <AnimatedPressable haptic={false} onPress={() => router.push("/prayer-settings")} style={styles.settingsButton}>
+          <AnimatedPressable
+            haptic={false}
+            onPress={() => router.push("/prayer-settings")}
+            accessibilityRole="button"
+            accessibilityLabel="إعدادات متقدمة"
+            style={styles.settingsButton}
+          >
             <Ionicons name="options-outline" size={20} color={colors.textMuted} />
           </AnimatedPressable>
           <AnimatedPressable
             onPress={() => router.push("/city-select")}
+            accessibilityRole="button"
+            accessibilityLabel={`المدينة: ${location ? location.cityNameAr : "اختر مدينتك"}، ${location?.source === "auto" ? "تم تحديده تلقائياً" : "تحديد يدوي"}`}
             style={[styles.cityRow, { backgroundColor: colors.surface, borderColor: colors.border }]}
           >
             <Ionicons name="chevron-back" size={18} color={colors.textMuted} />
@@ -59,6 +67,8 @@ export default function PrayerTimesScreen() {
 
         <AnimatedPressable
           onPress={detect}
+          accessibilityRole="button"
+          accessibilityLabel={status === "loading" ? "جارٍ تحديد الموقع" : "تحديد موقعي تلقائياً"}
           style={[styles.detectButton, { backgroundColor: colors.primarySoft, borderColor: colors.primary }]}
         >
           <Text style={[styles.detectText, { color: colors.primary }]}>
@@ -78,6 +88,8 @@ export default function PrayerTimesScreen() {
         {hasLocation && todayTimes ? (
           <>
             <View
+              accessible
+              accessibilityLabel={`الصلاة القادمة: ${nextPrayerLabel}، يتبقى ${formatCountdown(remainingMs)}`}
               style={[styles.hero, { backgroundColor: colors.primary }, heroShadow(colors.shadow) as object]}
             >
               <Text style={[styles.heroLabel, { color: colors.primaryText }]}>الصلاة القادمة</Text>
@@ -127,7 +139,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   settingsButton: {
-    padding: 6,
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
   cityRow: {
     flex: 1,
@@ -158,7 +173,7 @@ const styles = StyleSheet.create({
     gap: 8,
     borderWidth: 1,
     borderRadius: 14,
-    paddingVertical: 12,
+    minHeight: 44,
   },
   detectText: {
     fontFamily: fonts.semiBold,

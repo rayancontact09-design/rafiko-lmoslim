@@ -29,8 +29,9 @@ export function SearchBar({ value, onChangeText, placeholder }: SearchBarProps) 
         placeholderTextColor={colors.textMuted}
         style={[styles.input, { color: colors.text, fontFamily: fonts.regular }]}
         textAlign="right"
+        accessibilityLabel={placeholder}
       />
-      <Ionicons name="search" size={18} color={colors.textMuted} style={styles.icon} />
+      <Ionicons name="search" size={18} color={colors.textMuted} style={styles.icon} importantForAccessibility="no" />
     </View>
   );
 }

@@ -67,6 +67,9 @@ export default function QuranScreen() {
                 setNumberQuery("");
                 setTextQuery("");
               }}
+              accessibilityRole="tab"
+              accessibilityLabel={`بحث ${option.label}`}
+              accessibilityState={{ selected }}
               style={[
                 styles.modeChip,
                 {
@@ -114,6 +117,8 @@ export default function QuranScreen() {
               renderItem={({ item }) => (
                 <AnimatedPressable
                   onPress={() => router.push(`/surah/${item.surahNumber}?ayah=${item.ayahNumber}`)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${item.surahName}، آية ${item.ayahNumber}: ${item.text}`}
                   style={[styles.resultCard, { backgroundColor: colors.surface, borderColor: colors.border, marginHorizontal: 0 }, cardShadow(colors.shadow) as object]}
                 >
                   <View style={styles.resultTextWrap}>
@@ -144,7 +149,11 @@ export default function QuranScreen() {
           )}
 
           {numericResult?.unavailable && (
-            <View style={[styles.resultCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}>
+            <View
+              style={[styles.resultCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
+              accessible
+              accessibilityLabel="نقطة البداية الدقيقة لهذا الحزب غير متوفرة بعد. الأحزاب الفردية متوفرة لأنها تطابق بداية الأجزاء."
+            >
               <Ionicons name="information-circle-outline" size={22} color={colors.textMuted} />
               <Text style={[styles.unavailableText, { color: colors.textMuted }]}>
                 نقطة البداية الدقيقة لهذا الحزب غير متوفرة بعد. الأحزاب الفردية (1، 3، 5...) متوفرة لأنها تطابق
@@ -156,6 +165,8 @@ export default function QuranScreen() {
           {numericResult && !numericResult.unavailable && (
             <AnimatedPressable
               onPress={() => router.push(`/surah/${numericResult.surah.number}?ayah=${numericResult.ayahNumber}`)}
+              accessibilityRole="button"
+              accessibilityLabel={`${mode === "juz" ? "الجزء" : "الحزب"} ${numericResult.number}، يبدأ من سورة ${numericResult.surah.name}، آية ${numericResult.ayahNumber}`}
               style={[styles.resultCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
             >
               <View style={[styles.resultBadge, { backgroundColor: colors.primarySoft }]}>
@@ -195,7 +206,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
   hint: {
     fontSize: 13,

@@ -101,6 +101,13 @@ export default function QiblaScreen() {
       <Text style={[styles.bearingLabel, { color: colors.textMuted }]}>اتجاه القبلة من الشمال</Text>
 
       <View
+        accessible
+        accessibilityRole="image"
+        accessibilityLabel={
+          bearing !== null
+            ? `بوصلة القبلة، الاتجاه ${Math.round(bearing)} درجة من الشمال${isAligned ? "، أنت متجه الآن نحو القبلة" : ""}`
+            : "بوصلة القبلة"
+        }
         style={[
           styles.dial,
           { borderColor: isAligned ? colors.primary : colors.border, backgroundColor: colors.surface },

@@ -25,6 +25,9 @@ export default function AdkarScreen() {
         <AnimatedPressable
           onPress={() => setPeriod("matin")}
           haptic={false}
+          accessibilityRole="tab"
+          accessibilityLabel="أذكار الصباح"
+          accessibilityState={{ selected: period === "matin" }}
           style={[styles.tab, { backgroundColor: period === "matin" ? colors.primary : "transparent" }]}
         >
           <Text style={{ color: period === "matin" ? colors.primaryText : colors.text, fontFamily: fonts.semiBold }}>
@@ -34,6 +37,9 @@ export default function AdkarScreen() {
         <AnimatedPressable
           onPress={() => setPeriod("soir")}
           haptic={false}
+          accessibilityRole="tab"
+          accessibilityLabel="أذكار المساء"
+          accessibilityState={{ selected: period === "soir" }}
           style={[styles.tab, { backgroundColor: period === "soir" ? colors.primary : "transparent" }]}
         >
           <Text style={{ color: period === "soir" ? colors.primaryText : colors.text, fontFamily: fonts.semiBold }}>

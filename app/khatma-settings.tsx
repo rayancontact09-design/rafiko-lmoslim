@@ -32,6 +32,9 @@ export default function KhatmaSettingsScreen() {
               key={option.mode}
               haptic={false}
               onPress={() => setMode(option.mode)}
+              accessibilityRole="radio"
+              accessibilityLabel={`${option.title}. ${option.description}`}
+              accessibilityState={{ selected }}
               style={[
                 styles.card,
                 {

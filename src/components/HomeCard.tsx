@@ -24,6 +24,8 @@ export function HomeCard({ iconSet, iconName, title, badge, subtitle, onPress }:
   return (
     <AnimatedPressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={badge ? `${title}، ${badge}` : title}
       style={[
         styles.card,
         { backgroundColor: colors.surface, borderColor: colors.border },

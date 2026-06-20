@@ -25,6 +25,9 @@ export function ThemeToggle() {
             key={option.mode}
             onPress={() => setMode(option.mode)}
             haptic={false}
+            accessibilityRole="radio"
+            accessibilityLabel={`المظهر ${option.label}`}
+            accessibilityState={{ selected }}
             style={[styles.option, { backgroundColor: selected ? colors.primary : "transparent" }]}
           >
             <Text style={{ color: selected ? colors.primaryText : colors.text, fontFamily: fonts.semiBold }}>

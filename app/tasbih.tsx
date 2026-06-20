@@ -35,6 +35,9 @@ export default function TasbihScreen() {
             <AnimatedPressable
               key={option.id}
               onPress={() => setDhikrId(option.id)}
+              accessibilityRole="radio"
+              accessibilityLabel={option.text}
+              accessibilityState={{ selected }}
               style={[
                 styles.chip,
                 {
@@ -57,6 +60,9 @@ export default function TasbihScreen() {
         <AnimatedPressable
           onPress={handleIncrement}
           haptic={false}
+          accessibilityRole="button"
+          accessibilityLabel={`عداد التسبيح، ${count}`}
+          accessibilityHint="اضغط للزيادة"
           style={[styles.counterCircle, { backgroundColor: colors.primary }, heroShadow(colors.shadow) as object]}
         >
           <Text style={[styles.counterValue, { color: colors.primaryText }]}>{count}</Text>
@@ -64,6 +70,8 @@ export default function TasbihScreen() {
 
         <AnimatedPressable
           onPress={reset}
+          accessibilityRole="button"
+          accessibilityLabel="إعادة تصفير العداد"
           style={[styles.resetButton, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
         >
           <Ionicons name="refresh" size={18} color={colors.textMuted} />
@@ -89,7 +97,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 20,
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
   counterArea: {
     flex: 1,
@@ -116,11 +126,12 @@ const styles = StyleSheet.create({
   resetButton: {
     flexDirection: "row-reverse",
     alignItems: "center",
+    justifyContent: "center",
     gap: 8,
     borderWidth: 1,
     borderRadius: 14,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    minHeight: 44,
   },
   resetText: {
     fontFamily: fonts.medium,

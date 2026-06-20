@@ -57,6 +57,7 @@ export default function AdhanSettingsScreen() {
               value={enabled}
               onValueChange={handleToggleEnabled}
               disabled={isExpoGo}
+              accessibilityLabel="تفعيل الأذان"
               trackColor={{ false: colors.border, true: colors.primary }}
               thumbColor={colors.surface}
             />
@@ -102,6 +103,7 @@ export default function AdhanSettingsScreen() {
                 trackColor={{ false: colors.border, true: colors.primary }}
                 thumbColor={colors.surface}
                 disabled={!enabled}
+                accessibilityLabel={`تنبيه صلاة ${PRAYER_LABELS_AR[key]}`}
               />
               <Text style={[styles.prayerLabel, { color: enabled ? colors.text : colors.textMuted }]}>
                 {PRAYER_LABELS_AR[key]}
@@ -120,6 +122,9 @@ export default function AdhanSettingsScreen() {
                 haptic={false}
                 disabled={!option.available}
                 onPress={() => setMuezzinId(option.id)}
+                accessibilityRole="radio"
+                accessibilityLabel={option.available ? option.nameAr : `${option.nameAr}، قريباً`}
+                accessibilityState={{ selected, disabled: !option.available }}
                 style={[
                   styles.chip,
                   {
@@ -142,6 +147,8 @@ export default function AdhanSettingsScreen() {
           haptic={false}
           disabled={!preview.isAvailable}
           onPress={preview.isPlaying ? preview.stop : preview.play}
+          accessibilityRole="button"
+          accessibilityLabel={preview.isAvailable ? (preview.isPlaying ? "إيقاف معاينة الصوت" : "معاينة الصوت") : "لا يوجد ملف صوتي بعد لهذا المؤذن"}
           style={[styles.previewButton, { backgroundColor: colors.primarySoft, opacity: preview.isAvailable ? 1 : 0.5 }]}
         >
           <Ionicons name={preview.isPlaying ? "stop" : "play"} size={16} color={colors.primary} />
@@ -165,6 +172,7 @@ export default function AdhanSettingsScreen() {
               minimumTrackTintColor={colors.primary}
               maximumTrackTintColor={colors.border}
               thumbTintColor={colors.primary}
+              accessibilityLabel="مستوى صوت الأذان"
             />
             <Ionicons name="volume-mute" size={18} color={colors.textMuted} />
           </View>
@@ -179,6 +187,9 @@ export default function AdhanSettingsScreen() {
                 key={minutes}
                 haptic={false}
                 onPress={() => togglePreAlert(minutes)}
+                accessibilityRole="checkbox"
+                accessibilityLabel={`تنبيه قبل ${minutes} دقائق`}
+                accessibilityState={{ checked: selected }}
                 style={[
                   styles.chip,
                   {
@@ -257,7 +268,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical: 9,
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
   previewButton: {
     flexDirection: "row-reverse",
@@ -265,7 +278,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     borderRadius: 14,
-    paddingVertical: 12,
+    minHeight: 44,
   },
   previewText: {
     fontSize: 13,

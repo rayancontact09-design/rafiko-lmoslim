@@ -20,6 +20,9 @@ export function FavoriteButton({ active, onToggle }: FavoriteButtonProps) {
       }}
       style={styles.button}
       hitSlop={8}
+      accessibilityRole="button"
+      accessibilityLabel={active ? "إزالة من المفضلة" : "إضافة إلى المفضلة"}
+      accessibilityState={{ selected: active }}
     >
       <Ionicons
         name={active ? "star" : "star-outline"}

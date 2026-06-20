@@ -18,6 +18,8 @@ export function SurahListItem({ surah, onPress }: SurahListItemProps) {
     <AnimatedPressable
       onPress={onPress}
       haptic={false}
+      accessibilityRole="button"
+      accessibilityLabel={`سورة ${surah.name}، رقم ${surah.number}، ${surah.revelationType === "meccan" ? "مكية" : "مدنية"}، ${surah.ayahCount} آية`}
       style={[
         styles.row,
         { backgroundColor: colors.surface, borderColor: colors.border },

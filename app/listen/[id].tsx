@@ -50,13 +50,31 @@ export default function ListenPlayerScreen() {
       </View>
 
       <View style={styles.controlsRow}>
-        <View style={[styles.secondaryButton, { borderColor: colors.border }]}>
+        <View
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel="السورة السابقة"
+          accessibilityState={{ disabled: true }}
+          style={[styles.secondaryButton, { borderColor: colors.border }]}
+        >
           <Ionicons name="play-skip-back" size={20} color={colors.textMuted} />
         </View>
-        <View style={[styles.playButton, { backgroundColor: colors.primarySoft }]}>
+        <View
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel="تشغيل"
+          accessibilityState={{ disabled: true }}
+          style={[styles.playButton, { backgroundColor: colors.primarySoft }]}
+        >
           <Ionicons name="play" size={30} color={colors.primary} />
         </View>
-        <View style={[styles.secondaryButton, { borderColor: colors.border }]}>
+        <View
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel="السورة التالية"
+          accessibilityState={{ disabled: true }}
+          style={[styles.secondaryButton, { borderColor: colors.border }]}
+        >
           <Ionicons name="play-skip-forward" size={20} color={colors.textMuted} />
         </View>
       </View>

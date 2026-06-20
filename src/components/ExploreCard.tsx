@@ -23,6 +23,8 @@ export function ExploreCard({ iconSet, iconName, title, badge, onPress }: Explor
   return (
     <AnimatedPressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={badge ? `${title}، ${badge}` : title}
       style={[
         styles.card,
         { backgroundColor: colors.surface, borderColor: colors.border },

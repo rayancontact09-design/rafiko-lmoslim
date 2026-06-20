@@ -27,6 +27,9 @@ export function AyahCard({ surahNumber, ayah, isLastRead, onPress }: AyahCardPro
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`آية ${ayah.number}: ${ayah.text}`}
+      accessibilityHint="اضغط لتحديد هذه الآية كآخر قراءة"
       style={[
         styles.card,
         {

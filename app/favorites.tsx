@@ -58,6 +58,9 @@ export default function FavoritesScreen() {
         <AnimatedPressable
           haptic={false}
           onPress={() => setTab("favorites")}
+          accessibilityRole="tab"
+          accessibilityLabel="المفضلة"
+          accessibilityState={{ selected: tab === "favorites" }}
           style={[styles.tab, { backgroundColor: tab === "favorites" ? colors.primary : "transparent" }]}
         >
           <Text style={{ color: tab === "favorites" ? colors.primaryText : colors.text, fontFamily: fonts.semiBold }}>
@@ -67,6 +70,9 @@ export default function FavoritesScreen() {
         <AnimatedPressable
           haptic={false}
           onPress={() => setTab("bookmarks")}
+          accessibilityRole="tab"
+          accessibilityLabel="الإشارات المرجعية"
+          accessibilityState={{ selected: tab === "bookmarks" }}
           style={[styles.tab, { backgroundColor: tab === "bookmarks" ? colors.primary : "transparent" }]}
         >
           <Text style={{ color: tab === "bookmarks" ? colors.primaryText : colors.text, fontFamily: fonts.semiBold }}>
@@ -90,6 +96,8 @@ export default function FavoritesScreen() {
               <Pressable
                 disabled={!item.route}
                 onPress={() => item.route && router.push(item.route as never)}
+                accessibilityRole="button"
+                accessibilityLabel={`${item.title}: ${item.text}`}
                 style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
               >
                 <View style={styles.cardHeader}>
@@ -116,6 +124,8 @@ export default function FavoritesScreen() {
             renderItem={({ item }) => (
               <Pressable
                 onPress={() => router.push(item.route as never)}
+                accessibilityRole="button"
+                accessibilityLabel={`${item.title}: ${item.text}`}
                 style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
               >
                 <View style={styles.cardHeader}>

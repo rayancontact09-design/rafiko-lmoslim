@@ -20,6 +20,9 @@ export function BookmarkButton({ active, onToggle }: BookmarkButtonProps) {
       }}
       style={styles.button}
       hitSlop={8}
+      accessibilityRole="button"
+      accessibilityLabel={active ? "إزالة الإشارة المرجعية" : "إضافة إشارة مرجعية"}
+      accessibilityState={{ selected: active }}
     >
       <Ionicons
         name={active ? "bookmark" : "bookmark-outline"}

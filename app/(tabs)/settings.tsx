@@ -27,6 +27,8 @@ export default function SettingsScreen() {
       <View style={styles.linksGroup}>
         <AnimatedPressable
           onPress={() => router.push("/adhan-settings")}
+          accessibilityRole="button"
+          accessibilityLabel="إعدادات الأذان"
           style={[styles.linkRow, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
         >
           <Ionicons name="chevron-back" size={18} color={colors.textMuted} />
@@ -35,6 +37,8 @@ export default function SettingsScreen() {
         </AnimatedPressable>
         <AnimatedPressable
           onPress={() => router.push("/prayer-times")}
+          accessibilityRole="button"
+          accessibilityLabel="مواقيت الصلاة والموقع"
           style={[styles.linkRow, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
         >
           <Ionicons name="chevron-back" size={18} color={colors.textMuted} />
@@ -43,6 +47,8 @@ export default function SettingsScreen() {
         </AnimatedPressable>
         <AnimatedPressable
           onPress={() => router.push("/prayer-settings")}
+          accessibilityRole="button"
+          accessibilityLabel="إعدادات متقدمة، طريقة الحساب"
           style={[styles.linkRow, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
         >
           <Ionicons name="chevron-back" size={18} color={colors.textMuted} />
@@ -73,6 +79,8 @@ export default function SettingsScreen() {
       <AnimatedPressable
         haptic={false}
         onPress={() => Linking.openURL("https://tanzil.net")}
+        accessibilityRole="link"
+        accessibilityLabel="نص القرآن الكريم مأخوذ من مشروع Tanzil، اضغط لزيارة tanzil.net"
         style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
       >
         <Ionicons name="book-outline" size={24} color={colors.primary} />

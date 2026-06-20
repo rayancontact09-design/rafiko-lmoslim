@@ -48,6 +48,8 @@ function StatCard({
 
   return (
     <View
+      accessible
+      accessibilityLabel={`${label}: ${value}`}
       style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }, cardShadow(colors.shadow) as object]}
     >
       <View style={[styles.iconWrap, { backgroundColor: colors.primarySoft }]}>

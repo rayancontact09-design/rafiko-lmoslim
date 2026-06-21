@@ -1,6 +1,8 @@
-import React from "react";
-import { View, StyleSheet } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, StyleSheet, Animated } from "react-native";
 import Svg, { Circle } from "react-native-svg";
+
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 interface CircularProgressProps {
   percent: number;
@@ -22,7 +24,20 @@ export function CircularProgress({
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const clamped = Math.max(0, Math.min(100, percent));
-  const offset = circumference * (1 - clamped / 100);
+  const animatedPercent = useRef(new Animated.Value(clamped)).current;
+
+  useEffect(() => {
+    Animated.timing(animatedPercent, {
+      toValue: clamped,
+      duration: 450,
+      useNativeDriver: false,
+    }).start();
+  }, [clamped, animatedPercent]);
+
+  const strokeDashoffset = animatedPercent.interpolate({
+    inputRange: [0, 100],
+    outputRange: [circumference, 0],
+  });
 
   return (
     <View style={{ width: size, height: size }}>
@@ -35,7 +50,7 @@ export function CircularProgress({
           strokeWidth={strokeWidth}
           fill="none"
         />
-        <Circle
+        <AnimatedCircle
           cx={size / 2}
           cy={size / 2}
           r={radius}
@@ -43,7 +58,7 @@ export function CircularProgress({
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={`${circumference} ${circumference}`}
-          strokeDashoffset={offset}
+          strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
           rotation={-90}
           origin={`${size / 2}, ${size / 2}`}
